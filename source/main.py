@@ -115,7 +115,7 @@ def create_summary(tab):
     card_bar, card_label = make_row("Creepy Treat Cards")
     quest_bar, quest_label = make_row("Quests")
     costume_bar, costume_label = make_row("Costumes")
-    level_bar, level_label = make_row("Levels")
+    level_bar, level_label = make_row("Level 10")
 
 
 # ----------------------------
