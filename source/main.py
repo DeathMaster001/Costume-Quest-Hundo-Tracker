@@ -150,8 +150,8 @@ def create_levels(tab):
 def main():
     root = tk.Tk()
     root.title("Costume Quest Tracker")
-    root.geometry("800x725")
-    root.minsize(800, 725)
+    root.geometry("800x300")
+    root.minsize(800, 300)
 
     notebook = ttk.Notebook(root)
 
