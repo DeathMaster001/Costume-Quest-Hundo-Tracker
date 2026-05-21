@@ -179,10 +179,14 @@ def main():
 
     notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
-    # icon
-    icon = os.path.join(os.getcwd(), "icon.ico")
-    if os.path.exists(icon):
-        root.iconbitmap(icon)
+    # set icon if available
+    import constants
+    icon_path = os.path.join(constants.BASE_DIR, "icon.ico")
+    if os.path.exists(icon_path):
+        try:
+            root.iconbitmap(icon_path)
+        except Exception:
+            pass
 
     update_progress(root, stamps, cards, quests, costumes, levels)
 
