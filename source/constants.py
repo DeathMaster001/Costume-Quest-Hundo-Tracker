@@ -12,8 +12,6 @@ XP_THRESHOLDS = {
 
 LEVELS = [10]
 
-CHARACTER_NAMES = ["Reynold/Wren", "Everett", "Lucy"]
-
 QUEST_NAMES = [
     # Suburbs
     "Robot Repair",
