@@ -5,11 +5,7 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-XP_THRESHOLDS = {
-    1: 0, 2: 2500, 3: 6000, 4: 12000, 5: 20000,
-    6: 31000, 7: 45000, 8: 62000, 9: 82000, 10: 105000
-}
-
+#Use for DLC later
 LEVELS = [10]
 
 QUEST_NAMES = [

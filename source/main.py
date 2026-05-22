@@ -3,11 +3,10 @@ import os
 import tkinter as tk
 from tkinter import ttk
 from constants import (
-    COSTUME_NAMES,
     BATTLE_STAMP_NAMES,
+    COSTUME_NAMES,
     CARD_NAMES,
     QUEST_NAMES,
-    LEVELS
 )
 
 # ----------------------------
@@ -20,34 +19,51 @@ def calc_progress(vars_list):
     pct = (done / total * 100) if total else 0
     return done, total, pct
 
+def summarize_missing(groups):
+    parts = []
 
-def update_progress(parent, stamp, card, quest, costume, level):
+    for name, vars_list in groups.items():
+        missing = sum(not v.get() for v in vars_list)
+
+        if missing > 0:
+            if name == "Level 10":
+                parts.append("Level 10")
+            else:
+                parts.append(f"{missing} {name}")
+
+    if not parts:
+        return "Everything completed 🎉"
+
+    return "Missing: " + ", ".join(parts)
+
+def update_progress(parent, stamp, costume, card, quest, level):
     s_done, s_total, s_pct = calc_progress(stamp)
+    co_done, co_total, co_pct = calc_progress(costume)
     c_done, c_total, c_pct = calc_progress(card)
     q_done, q_total, q_pct = calc_progress(quest)
-    co_done, co_total, co_pct = calc_progress(costume)
     l_done, l_total, l_pct = calc_progress(level)
 
-    all_vars = stamp + card + quest + costume + level
+    all_vars = stamp + costume + card + quest + level
     t_done, t_total, t_pct = calc_progress(all_vars)
 
     # update bars
     stamp_bar["value"] = s_pct
+    costume_bar["value"] = co_pct
     card_bar["value"] = c_pct
     quest_bar["value"] = q_pct
-    costume_bar["value"] = co_pct
     level_bar["value"] = l_pct
     progress_bar["value"] = t_pct
 
     # update text
     progress_label.config(text=f"Overall {t_done}/{t_total} ({t_pct:.1f}%)")
     stamp_label.config(text=f"{s_done}/{s_total} ({s_pct:.1f}%)")
+    costume_label.config(text=f"{co_done}/{co_total} ({co_pct:.1f}%)")
     card_label.config(text=f"{c_done}/{c_total} ({c_pct:.1f}%)")
     quest_label.config(text=f"{q_done}/{q_total} ({q_pct:.1f}%)")
-    costume_label.config(text=f"{co_done}/{co_total} ({co_pct:.1f}%)")
     level_label.config(text=f"{l_done}/{l_total} ({l_pct:.1f}%)")
+    missing_summary_label.config(text=summarize_missing({"Stamps": stamp, "Costumes": costume, "Cards": card, "Quests": quest, "Level 10": level}))
 
-    parent.after(300, lambda: update_progress(parent, stamp, card, quest, costume, level))
+    parent.after(300, lambda: update_progress(parent, stamp, costume, card, quest, level))
 
 
 # ----------------------------
@@ -83,7 +99,7 @@ def make_checklist(tab, items, per_col, cols):
 def create_summary(tab):
     global progress_bar, progress_label
     global stamp_bar, card_bar, quest_bar, costume_bar, level_bar
-    global stamp_label, card_label, quest_label, costume_label, level_label
+    global stamp_label, card_label, quest_label, costume_label, level_label, missing_summary_label
 
     # overall row
     row = tk.Frame(tab)
@@ -112,10 +128,13 @@ def create_summary(tab):
         return bar, lbl
 
     stamp_bar, stamp_label = make_row("Battle Stamps")
+    costume_bar, costume_label = make_row("Costumes")
     card_bar, card_label = make_row("Creepy Treat Cards")
     quest_bar, quest_label = make_row("Quests")
-    costume_bar, costume_label = make_row("Costumes")
     level_bar, level_label = make_row("Level 10")
+
+    missing_summary_label = tk.Label(tab, text="", anchor="w", justify="left")
+    missing_summary_label.pack(fill="x", padx=10, pady=10)
 
 
 # ----------------------------
@@ -135,12 +154,11 @@ def create_quests(tab):
     return make_checklist(tab, QUEST_NAMES, 9, 4)
 
 def create_levels(tab):
-    vars_list = []
-    for lv in LEVELS:
-        v = tk.BooleanVar()
-        tk.Checkbutton(tab, text=f"Level {lv}", variable=v).pack(anchor="w", padx=10)
-        vars_list.append(v)
-    return vars_list
+    level10_var = tk.BooleanVar()
+
+    tk.Checkbutton(tab, text="Level 10", variable=level10_var).pack(anchor="w", padx=10)
+
+    return [level10_var]
 
 
 # ----------------------------
@@ -166,16 +184,15 @@ def main():
     notebook.add(t2, text="Stamps")
     notebook.add(t3, text="Costumes")
     notebook.add(t4, text="Cards")
-    notebook.add(t5, text="Levels")
-    notebook.add(t6, text="Quests")
+    notebook.add(t5, text="Quests")
+    notebook.add(t6, text="Level")
 
     create_summary(t1)
-
     stamps = create_stamps(t2)
     costumes = create_costumes(t3)
     cards = create_cards(t4)
-    levels = create_levels(t5)
-    quests = create_quests(t6)
+    quests = create_quests(t5)
+    levels = create_levels(t6)
 
     notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -188,7 +205,7 @@ def main():
         except Exception:
             pass
 
-    update_progress(root, stamps, cards, quests, costumes, levels)
+    update_progress(root, stamps, costumes, cards, quests, levels)
 
     root.mainloop()
 
