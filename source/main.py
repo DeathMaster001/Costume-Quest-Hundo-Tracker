@@ -37,31 +37,39 @@ def summarize_missing(groups):
     return "Missing: " + ", ".join(parts)
 
 def update_progress(parent, stamp, costume, card, quest, level):
-    s_done, s_total, s_pct = calc_progress(stamp)
-    co_done, co_total, co_pct = calc_progress(costume)
-    c_done, c_total, c_pct = calc_progress(card)
-    q_done, q_total, q_pct = calc_progress(quest)
-    l_done, l_total, l_pct = calc_progress(level)
+    categories = {
+        "Stamps": stamp,
+        "Costumes": costume,
+        "Cards": card,
+        "Quests": quest,
+        "Level 10": level
+    }
 
-    all_vars = stamp + costume + card + quest + level
-    t_done, t_total, t_pct = calc_progress(all_vars)
+    ui_map = {
+        "Stamps": (stamp_bar, stamp_label),
+        "Costumes": (costume_bar, costume_label),
+        "Cards": (card_bar, card_label),
+        "Quests": (quest_bar, quest_label),
+        "Level 10": (level_bar, level_label),
+    }
 
-    # update bars
-    stamp_bar["value"] = s_pct
-    costume_bar["value"] = co_pct
-    card_bar["value"] = c_pct
-    quest_bar["value"] = q_pct
-    level_bar["value"] = l_pct
-    progress_bar["value"] = t_pct
+    total_done = total_items = 0
 
-    # update text
-    progress_label.config(text=f"Overall {t_done}/{t_total} ({t_pct:.1f}%)")
-    stamp_label.config(text=f"{s_done}/{s_total} ({s_pct:.1f}%)")
-    costume_label.config(text=f"{co_done}/{co_total} ({co_pct:.1f}%)")
-    card_label.config(text=f"{c_done}/{c_total} ({c_pct:.1f}%)")
-    quest_label.config(text=f"{q_done}/{q_total} ({q_pct:.1f}%)")
-    level_label.config(text=f"{l_done}/{l_total} ({l_pct:.1f}%)")
-    missing_summary_label.config(text=summarize_missing({"Stamps": stamp, "Costumes": costume, "Cards": card, "Quests": quest, "Level 10": level}))
+    for name, vars_list in categories.items():
+        done, total, pct = calc_progress(vars_list)
+        total_done += done
+        total_items += total
+
+        bar, label = ui_map[name]
+        bar["value"] = pct
+        label.config(text=f"{done}/{total} ({pct:.1f}%)")
+
+    overall_pct = (total_done / total_items * 100) if total_items else 0
+
+    progress_bar["value"] = overall_pct
+    progress_label.config(text=f"{total_done}/{total_items} ({overall_pct:.1f}%)")
+
+    missing_summary_label.config(text=summarize_missing(categories))
 
     parent.after(300, lambda: update_progress(parent, stamp, costume, card, quest, level))
 
